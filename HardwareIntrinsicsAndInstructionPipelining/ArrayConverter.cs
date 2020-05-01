@@ -48,9 +48,12 @@ namespace HardwareIntrinsicsAndInstructionPipelining
         public static unsafe byte[] GetBytesVectorsPipelined(double[] values)
         {
             if (!Avx.IsSupported) throw new Exception("AVX is not supported");
-            
-            var blockSize = Vector256<double>.Count * 2; // 2 vectors into the pipeline
-            if (values.Length < blockSize) throw new Exception("Give me more doubles!");
+
+            var blockSize = 4; // 4 vectors into the pipeline
+            var byteVectorSize = Vector256<byte>.Count;
+            var doubleVectorSize = Vector256<double>.Count; 
+            var batchSize = doubleVectorSize * blockSize;
+            if (values.Length < batchSize) throw new Exception("Give me more doubles!");
 
             var result = new byte[values.Length * sizeof(double)];
 
@@ -58,19 +61,19 @@ namespace HardwareIntrinsicsAndInstructionPipelining
             fixed (byte* pResult = result)
             {
                 var i = 0;
-                for (; i < values.Length - blockSize; i += blockSize)
+                for (; i < values.Length - batchSize; i += batchSize)
                 {
                     // CPU dependent pipelining
-                    // My CPU has latency 1 and throughput 0.5 for this instruction, so we can unroll 2 vectors
-                    var doubles1 = Avx.LoadVector256(pValues + i);
-                    var doubles2 = Avx.LoadVector256(pValues + i + 4);
+                    var vector1 = Avx.LoadVector256(pValues + i);
+                    var vector2 = Avx.LoadVector256(pValues + i + blockSize);
+                    var vector3 = Avx.LoadVector256(pValues + i + blockSize * 2);
+                    var vector4 = Avx.LoadVector256(pValues + i + blockSize * 3);
 
-                    var bytes1 = doubles1.AsByte();
-                    var bytes2 = doubles2.AsByte();
-
-                    var shift = i << 3;
-                    Avx.Store(pResult + shift, bytes1);
-                    Avx.Store(pResult + shift + 32, bytes2);
+                    var offset = i * sizeof(double);
+                    Avx.Store(pResult + offset, vector1.AsByte());
+                    Avx.Store(pResult + offset + byteVectorSize, vector2.AsByte());
+                    Avx.Store(pResult + offset + byteVectorSize * 2, vector3.AsByte());
+                    Avx.Store(pResult + offset + byteVectorSize * 3, vector4.AsByte());
                 }
                 
                 if (i == values.Length - 1)
