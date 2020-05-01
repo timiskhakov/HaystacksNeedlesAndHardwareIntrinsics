@@ -25,17 +25,17 @@ namespace HardwareIntrinsicsAndInstructionPipelining
         {
             return ArrayConverter.GetBytes(_input);
         }
+
+        [Benchmark]
+        public byte[] VectorsPipelined()
+        {
+            return ArrayConverter.GetBytesVectorsPipelined(_input);
+        }
         
         [Benchmark]
         public byte[] Vectors()
         {
             return ArrayConverter.GetBytesVectors(_input);
-        }
-        
-        [Benchmark]
-        public byte[] VectorsPipelined()
-        {
-            return ArrayConverter.GetBytesVectorsPipelined(_input);
         }
     }
 }
