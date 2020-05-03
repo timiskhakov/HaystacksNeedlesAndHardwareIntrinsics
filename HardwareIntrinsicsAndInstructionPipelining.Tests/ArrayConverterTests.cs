@@ -20,13 +20,5 @@ namespace HardwareIntrinsicsAndInstructionPipelining.Tests
             
             CollectionAssert.AreEqual(Data.Bytes, actual);
         }
-        
-        [TestMethod]
-        public void GetBytesVectorsPipelined()
-        {
-            var actual = ArrayConverter.GetBytesVectorsPipelined(Data.Doubles);
-            
-            CollectionAssert.AreEqual(Data.Bytes, actual);
-        }
     }
 }
