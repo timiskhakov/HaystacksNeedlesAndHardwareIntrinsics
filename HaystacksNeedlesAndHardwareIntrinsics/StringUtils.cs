@@ -6,6 +6,8 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 {
     public static class StringUtils
     {
+        private static readonly int BatchSize = Vector128<ushort>.Count;
+
         public static unsafe int IndexOf(string origin, string str)
         {
             if (string.IsNullOrEmpty(origin) || string.IsNullOrEmpty(str))
@@ -21,31 +23,25 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
                 
                 var first = Vector128.Create(pStr[0]);
                 var last = Vector128.Create(pStr[str.Length - 1]);
-
-                for (var i = 0; i < origin.Length; i += Vector128<ushort>.Count)
+                for (var i = 0; i < origin.Length; i += BatchSize)
                 {
                     var firstBlock = Sse2.LoadVector128(pOrigin + i);
                     var lastBlock = Sse2.LoadVector128(pOrigin + i + str.Length - 1);
 
                     var firstMatch = Sse2.CompareEqual(first, firstBlock);
                     var lastMatch = Sse2.CompareEqual(last, lastBlock);
-
-                    var and = Sse2.And(firstMatch, lastMatch);
-                    var bytes = and.AsByte();
-                    var mask = Sse2.MoveMask(bytes);
+                    
+                    var mask = Sse2.MoveMask(Sse2.And(firstMatch, lastMatch).AsByte());
                     while (mask > 0)
                     {
-                        var positionInBytes = GetFirstSetBitPosition(mask);
+                        var positionInBytes = GetFirstBit(mask);
                         var position = Math.DivRem(positionInBytes, 2, out var rem);
-                        if (rem == 0)
+                        if (rem == 0 && Compare(pOrigin, i + position - 1, pStr, 0, str.Length))
                         {
-                            if (ContainsIntrinsics(pOrigin, i + position - 1, pStr, 0, str.Length))
-                            {
-                                return i + position - 1;
-                            }
+                            return i + position - 1;
                         }
 
-                        mask = SetLowestBitToZero(mask);
+                        mask = ClearFirstBit(mask);
                     }
                 }
             }
@@ -53,24 +49,19 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
             return -1;
         }
 
-        private static int GetFirstSetBitPosition(int number) => (int)(Math.Log10(number & -number) / Math.Log10(2)) + 1;
+        private static int GetFirstBit(int number) => (int)(Math.Log10(number & -number) / Math.Log10(2)) + 1;
 
-        private static int SetLowestBitToZero(int number) => number & (number - 1);
+        private static int ClearFirstBit(int number) => number & (number - 1);
 
-        private static unsafe bool ContainsIntrinsics(
-            ushort* source,
-            int sourceOffset,
-            ushort* dest,
-            int destOffset,
-            int length)
+        private static unsafe bool Compare(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
         {
-            if (length < Vector128<ushort>.Count)
+            if (length < BatchSize)
             {
-                return Contains(source, sourceOffset, dest, destOffset, length);
+                return CompareByElement(source, sourceOffset, dest, destOffset, length);
             }
             
             var i = 0;
-            for (; i < length - Vector128<ushort>.Count; i += Vector128<ushort>.Count)
+            for (; i < length - BatchSize; i += BatchSize)
             {
                 var sourceVector = Sse2.LoadVector128(source + i);
                 var destVector = Sse2.LoadVector128(dest + i);
@@ -88,10 +79,10 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
                 return true;
             }
             
-            return Contains(source, sourceOffset, dest, destOffset, length - i);
+            return CompareByElement(source, sourceOffset, dest, destOffset, length - i);
         }
         
-        private static unsafe bool Contains(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
+        private static unsafe bool CompareByElement(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
         {
             for (var i = 0; i < length; i++)
             {
