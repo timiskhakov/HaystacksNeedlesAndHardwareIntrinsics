@@ -31,12 +31,12 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
                     var firstMatch = Sse2.CompareEqual(first, firstBlock);
                     var lastMatch = Sse2.CompareEqual(last, lastBlock);
                     
-                    var mask = Sse2.MoveMask(Sse2.And(firstMatch, lastMatch).AsByte());
+                    var maskBytes = Sse2.MoveMask(Sse2.And(firstMatch, lastMatch).AsByte());
+                    var mask = RemoveOddBits(maskBytes);
                     while (mask > 0)
                     {
-                        var positionInBytes = GetFirstBit(mask);
-                        var position = Math.DivRem(positionInBytes, 2, out var rem);
-                        if (rem == 0 && Compare(pOrigin, i + position - 1, pStr, 0, str.Length))
+                        var position = GetFirstBit(mask);
+                        if (Compare(pOrigin, i + position, pStr, 1, str.Length - 2))
                         {
                             return i + position - 1;
                         }
@@ -47,6 +47,15 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
             }
 
             return -1;
+        }
+
+        private static int RemoveOddBits(int number)
+        {
+            number = ((number & 0x44444444) >> 1) | ((number & 0x11111111) >> 0);
+            number = ((number & 0x30303030) >> 2) | ((number & 0x03030303) >> 0);
+            number = ((number & 0x0F000F00) >> 4) | ((number & 0x000F000F) >> 0);
+            number = ((number & 0x00FF0000) >> 8) | ((number & 0x000000FF) >> 0);
+            return number;
         }
 
         private static int GetFirstBit(int number)
