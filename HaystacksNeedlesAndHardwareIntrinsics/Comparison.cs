@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using BenchmarkDotNet.Attributes;
 
 namespace HaystacksNeedlesAndHardwareIntrinsics
@@ -26,6 +27,13 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
         public int IndexOf()
         {
             return _haystack.IndexOf(Needle, StringComparison.Ordinal);
+        }
+
+        [Benchmark]
+        public int RegEx()
+        {
+            var match = Regex.Match(_haystack, Needle);
+            return match.Success ? match.Index : -1;
         }
         
         [Benchmark]

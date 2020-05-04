@@ -39,7 +39,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
                         var position = Math.DivRem(positionInBytes, 2, out var rem);
                         if (rem == 0)
                         {
-                            if (IsMatch(pOrigin, i + position - 1, pStr, 0, str.Length))
+                            if (ContainsIntrinsics(pOrigin, i + position - 1, pStr, 0, str.Length))
                             {
                                 return i + position - 1;
                             }
@@ -57,7 +57,41 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 
         private static int SetLowestBitToZero(int number) => number & (number - 1);
 
-        private static unsafe bool IsMatch(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
+        private static unsafe bool ContainsIntrinsics(
+            ushort* source,
+            int sourceOffset,
+            ushort* dest,
+            int destOffset,
+            int length)
+        {
+            if (length < Vector128<ushort>.Count)
+            {
+                return Contains(source, sourceOffset, dest, destOffset, length);
+            }
+            
+            var i = 0;
+            for (; i < length - Vector128<ushort>.Count; i += Vector128<ushort>.Count)
+            {
+                var sourceVector = Sse2.LoadVector128(source + i);
+                var destVector = Sse2.LoadVector128(dest + i);
+
+                var result = Sse2.CompareEqual(sourceVector, destVector);
+                var mask = Sse2.MoveMask(result.AsByte());
+                if (mask != ushort.MaxValue)
+                {
+                    return false;
+                }
+            }
+            
+            if (i == length - 1)
+            {
+                return true;
+            }
+            
+            return Contains(source, sourceOffset, dest, destOffset, length - i);
+        }
+        
+        private static unsafe bool Contains(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
         {
             for (var i = 0; i < length; i++)
             {

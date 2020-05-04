@@ -6,6 +6,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics.Tests
     public class StringUtilsTests
     {
         [DataTestMethod]
+        [DataRow("Hi there, where is the needle", "Hi there, where is the needle", 0)]
         [DataRow("Hi there, where is the needle", "the", 3)]
         [DataRow("x", "x", 0)]
         [DataRow("There is no needle here", "noNeedle", -1)]
