@@ -13,7 +13,7 @@ namespace HardwareIntrinsicsAndInstructionPipelining
             return result;
         }
         
-        public static unsafe byte[] GetBytesVectors(double[] values)
+        public static unsafe byte[] GetBytesIntrinsics(double[] values)
         {
             if (!Avx.IsSupported) throw new Exception("AVX is not supported");
             

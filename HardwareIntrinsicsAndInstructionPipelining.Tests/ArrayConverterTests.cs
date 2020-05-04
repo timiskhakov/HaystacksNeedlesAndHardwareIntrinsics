@@ -16,7 +16,7 @@ namespace HardwareIntrinsicsAndInstructionPipelining.Tests
         [TestMethod]
         public void GetBytesVectors()
         {
-            var actual = ArrayConverter.GetBytesVectors(Data.Doubles);
+            var actual = ArrayConverter.GetBytesIntrinsics(Data.Doubles);
             
             CollectionAssert.AreEqual(Data.Bytes, actual);
         }

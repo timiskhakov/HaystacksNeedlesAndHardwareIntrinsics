@@ -4,7 +4,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace HardwareIntrinsicsAndInstructionPipelining
 {
-    public class Comparison
+    public class ConversionComparison
     {
         private readonly Random _random = new Random();
         private double[] _input;
@@ -27,7 +27,7 @@ namespace HardwareIntrinsicsAndInstructionPipelining
         }
 
         [Benchmark]
-        public byte[] Vectors()
+        public byte[] Intrinsics()
         {
             return ArrayConverter.GetBytesVectors(_input);
         }

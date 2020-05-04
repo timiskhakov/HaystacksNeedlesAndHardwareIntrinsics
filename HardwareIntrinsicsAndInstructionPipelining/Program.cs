@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
+using HardwareIntrinsicsAndInstructionPipelining.Comparisons;
 
 namespace HardwareIntrinsicsAndInstructionPipelining
 {
@@ -6,7 +7,8 @@ namespace HardwareIntrinsicsAndInstructionPipelining
     {
         private static void Main()
         {
-            BenchmarkRunner.Run<Comparison>();
+            //BenchmarkRunner.Run<ConversionComparison>();
+            BenchmarkRunner.Run<StringSearchComparison>();
         }
     }
 }
