@@ -6,27 +6,17 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 {
     public static class StringUtils
     {
-        private static readonly int BatchSize = Vector128<ushort>.Count;
-
         public static unsafe int IndexOf(string origin, string str)
         {
-            if (string.IsNullOrEmpty(origin) || string.IsNullOrEmpty(str))
+            fixed (char* pOrigin = origin)
+            fixed (char* pStr = str)
             {
-                return -1;
-            }
-            
-            fixed (char* pOriginChar = origin)
-            fixed (char* pStrChar = str)
-            {
-                var pOrigin = (ushort*) pOriginChar;
-                var pStr = (ushort*) pStrChar;
-                
                 var first = Vector128.Create(pStr[0]);
                 var last = Vector128.Create(pStr[str.Length - 1]);
-                for (var i = 0; i < origin.Length; i += BatchSize)
+                for (var i = 0; i < origin.Length; i += Vector128<ushort>.Count)
                 {
-                    var firstBlock = Sse2.LoadVector128(pOrigin + i);
-                    var lastBlock = Sse2.LoadVector128(pOrigin + i + str.Length - 1);
+                    var firstBlock = Sse2.LoadVector128((ushort*) pOrigin + i);
+                    var lastBlock = Sse2.LoadVector128((ushort*) pOrigin + i + str.Length - 1);
 
                     var firstMatch = Sse2.CompareEqual(first, firstBlock);
                     var lastMatch = Sse2.CompareEqual(last, lastBlock);
@@ -68,7 +58,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
             return number & (number - 1);
         }
 
-        private static unsafe bool Compare(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
+        private static unsafe bool Compare(char* source, int sourceOffset, char* dest, int destOffset, int length)
         {
             for (var i = 0; i < length; i++)
             {
