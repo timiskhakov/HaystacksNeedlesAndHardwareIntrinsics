@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HaystacksNeedlesAndHardwareIntrinsics", "HaystacksNeedlesAndHardwareIntrinsics\HaystacksNeedlesAndHardwareIntrinsics.csproj", "{4AE6194A-7423-485F-BAE1-BE0E3B8A4B27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardwareIntrinsicsAndInstructionPipelining.Tests", "HardwareIntrinsicsAndInstructionPipelining.Tests\HardwareIntrinsicsAndInstructionPipelining.Tests.csproj", "{E8CCC5AD-62E0-49D4-9785-FD08CE4E71CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HaystacksNeedlesAndHardwareIntrinsics.Tests", "HaystacksNeedlesAndHardwareIntrinsics.Tests\HaystacksNeedlesAndHardwareIntrinsics.Tests.csproj", "{E8CCC5AD-62E0-49D4-9785-FD08CE4E71CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
