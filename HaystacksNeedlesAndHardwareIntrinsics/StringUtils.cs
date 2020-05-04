@@ -49,40 +49,17 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
             return -1;
         }
 
-        private static int GetFirstBit(int number) => (int)(Math.Log10(number & -number) / Math.Log10(2)) + 1;
+        private static int GetFirstBit(int number)
+        {
+            return (int) (Math.Log10(number & -number) / Math.Log10(2)) + 1;
+        }
 
-        private static int ClearFirstBit(int number) => number & (number - 1);
+        private static int ClearFirstBit(int number)
+        {
+            return number & (number - 1);
+        }
 
         private static unsafe bool Compare(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
-        {
-            if (length < BatchSize)
-            {
-                return CompareByElement(source, sourceOffset, dest, destOffset, length);
-            }
-            
-            var i = 0;
-            for (; i < length - BatchSize; i += BatchSize)
-            {
-                var sourceVector = Sse2.LoadVector128(source + i);
-                var destVector = Sse2.LoadVector128(dest + i);
-
-                var result = Sse2.CompareEqual(sourceVector, destVector);
-                var mask = Sse2.MoveMask(result.AsByte());
-                if (mask != ushort.MaxValue)
-                {
-                    return false;
-                }
-            }
-            
-            if (i == length - 1)
-            {
-                return true;
-            }
-            
-            return CompareByElement(source, sourceOffset, dest, destOffset, length - i);
-        }
-        
-        private static unsafe bool CompareByElement(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
         {
             for (var i = 0; i < length; i++)
             {

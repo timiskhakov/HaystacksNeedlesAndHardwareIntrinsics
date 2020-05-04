@@ -32,7 +32,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
         [Benchmark]
         public int RegEx()
         {
-            var match = Regex.Match(_haystack, Needle);
+            var match = Regex.Match(_haystack, Needle, RegexOptions.Compiled);
             return match.Success ? match.Index : -1;
         }
         
