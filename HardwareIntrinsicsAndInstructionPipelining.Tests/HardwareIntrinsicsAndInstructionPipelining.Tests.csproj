@@ -4,6 +4,10 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
 
         <IsPackable>false</IsPackable>
+
+        <AssemblyName>HaystacksNeedlesAndHardwareIntrinsics.Tests</AssemblyName>
+
+        <RootNamespace>HaystacksNeedlesAndHardwareIntrinsics.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HardwareIntrinsicsAndInstructionPipelining\HardwareIntrinsicsAndInstructionPipelining.csproj" />
+      <ProjectReference Include="..\HaystacksNeedlesAndHardwareIntrinsics\HaystacksNeedlesAndHardwareIntrinsics.csproj" />
     </ItemGroup>
 
 </Project>

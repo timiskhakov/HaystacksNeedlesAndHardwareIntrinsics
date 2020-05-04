@@ -3,9 +3,9 @@ using System.Linq;
 using System.Text;
 using BenchmarkDotNet.Attributes;
 
-namespace HardwareIntrinsicsAndInstructionPipelining.Comparisons
+namespace HaystacksNeedlesAndHardwareIntrinsics
 {
-    public class StringSearchComparison
+    public class Comparison
     {
         private string _haystack;
         private static readonly string Needle = Guid.NewGuid().ToString();
