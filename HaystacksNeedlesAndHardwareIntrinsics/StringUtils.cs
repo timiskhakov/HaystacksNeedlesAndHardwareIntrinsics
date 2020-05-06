@@ -6,29 +6,34 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 {
     public static class StringUtils
     {
-        public static unsafe int IndexOf(string origin, string str)
+        public static unsafe int IndexOf(string haystack, string needle)
         {
-            fixed (char* pOrigin = origin)
-            fixed (char* pStr = str)
+            if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle))
             {
-                var first = Vector128.Create(pStr[0]);
-                var last = Vector128.Create(pStr[str.Length - 1]);
-                for (var i = 0; i < origin.Length; i += Vector128<ushort>.Count)
+                return -1;
+            }
+            
+            fixed (char* pHaystack = haystack)
+            fixed (char* pNeedle = needle)
+            {
+                var needleFirst = Vector128.Create(pNeedle[0]);
+                var needleLast = Vector128.Create(pNeedle[needle.Length - 1]);
+                for (var i = 0; i < haystack.Length; i += Vector128<ushort>.Count)
                 {
-                    var firstBlock = Sse2.LoadVector128((ushort*) pOrigin + i);
-                    var lastBlock = Sse2.LoadVector128((ushort*) pOrigin + i + str.Length - 1);
+                    var blockFirst = Sse2.LoadVector128((ushort*) pHaystack + i);
+                    var blockLast = Sse2.LoadVector128((ushort*) pHaystack + i + needle.Length - 1);
 
-                    var firstMatch = Sse2.CompareEqual(first, firstBlock);
-                    var lastMatch = Sse2.CompareEqual(last, lastBlock);
+                    var matchFirst = Sse2.CompareEqual(needleFirst, blockFirst);
+                    var matchLast = Sse2.CompareEqual(needleLast, blockLast);
                     
-                    var maskBytes = Sse2.MoveMask(Sse2.And(firstMatch, lastMatch).AsByte());
+                    var maskBytes = Sse2.MoveMask(Sse2.And(matchFirst, matchLast).AsByte());
                     var mask = RemoveOddBits(maskBytes);
                     while (mask > 0)
                     {
                         var position = GetFirstBit(mask);
-                        if (Compare(pOrigin, i + position, pStr, 1, str.Length - 2))
+                        if (Compare(pHaystack, i + position + 1, pNeedle, 1, needle.Length - 2))
                         {
-                            return i + position - 1;
+                            return i + position;
                         }
 
                         mask = ClearFirstBit(mask);
@@ -39,23 +44,23 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
             return -1;
         }
 
-        private static int RemoveOddBits(int number)
+        private static int RemoveOddBits(int n)
         {
-            number = ((number & 0x44444444) >> 1) | (number & 0x11111111);
-            number = ((number & 0x30303030) >> 2) | (number & 0x03030303);
-            number = ((number & 0x0F000F00) >> 4) | (number & 0x000F000F);
-            number = ((number & 0x00FF0000) >> 8) | (number & 0x000000FF);
-            return number;
+            n = ((n & 0x44444444) >> 1) | (n & 0x11111111);
+            n = ((n & 0x30303030) >> 2) | (n & 0x03030303);
+            n = ((n & 0x0F000F00) >> 4) | (n & 0x000F000F);
+            n = ((n & 0x00FF0000) >> 8) | (n & 0x000000FF);
+            return n;
         }
 
-        private static int GetFirstBit(int number)
+        private static int GetFirstBit(int n)
         {
-            return (int) (Math.Log10(number & -number) / Math.Log10(2)) + 1;
+            return (int) (Math.Log10(n & -n) / Math.Log10(2));
         }
 
-        private static int ClearFirstBit(int number)
+        private static int ClearFirstBit(int n)
         {
-            return number & (number - 1);
+            return n & (n - 1);
         }
 
         private static unsafe bool Compare(char* source, int sourceOffset, char* dest, int destOffset, int length)
