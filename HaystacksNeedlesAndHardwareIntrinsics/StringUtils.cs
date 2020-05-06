@@ -13,20 +13,26 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
                 return -1;
             }
             
-            fixed (char* pHaystack = haystack)
-            fixed (char* pNeedle = needle)
+            var blockSize = Vector256<ushort>.Count;
+            
+            fixed (char* pHaystackChar = haystack)
+            fixed (char* pNeedleChar = needle)
             {
-                var needleFirst = Vector128.Create(pNeedle[0]);
-                var needleLast = Vector128.Create(pNeedle[needle.Length - 1]);
-                for (var i = 0; i < haystack.Length; i += Vector128<ushort>.Count)
+                var pHaystack = (ushort*) pHaystackChar;
+                var pNeedle = (ushort*) pNeedleChar;
+                
+                var needleFirst = Vector256.Create(pNeedle[0]);
+                var needleLast = Vector256.Create(pNeedle[needle.Length - 1]);
+                for (var i = 0; i < haystack.Length; i += blockSize)
                 {
-                    var blockFirst = Sse2.LoadVector128((ushort*) pHaystack + i);
-                    var blockLast = Sse2.LoadVector128((ushort*) pHaystack + i + needle.Length - 1);
+                    var blockFirst = Avx.LoadVector256(pHaystack + i);
+                    var blockLast = Avx.LoadVector256(pHaystack + i + needle.Length - 1);
 
-                    var matchFirst = Sse2.CompareEqual(needleFirst, blockFirst);
-                    var matchLast = Sse2.CompareEqual(needleLast, blockLast);
-                    
-                    var maskBytes = Sse2.MoveMask(Sse2.And(matchFirst, matchLast).AsByte());
+                    var matchFirst = Avx2.CompareEqual(needleFirst, blockFirst);
+                    var matchLast = Avx2.CompareEqual(needleLast, blockLast);
+
+                    var and = Avx2.And(matchFirst, matchLast);
+                    var maskBytes = Avx2.MoveMask(and.AsByte());
                     var mask = RemoveOddBits(maskBytes);
                     while (mask > 0)
                     {
@@ -63,7 +69,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
             return n & (n - 1);
         }
 
-        private static unsafe bool Compare(char* source, int sourceOffset, char* dest, int destOffset, int length)
+        private static unsafe bool Compare(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
         {
             for (var i = 0; i < length; i++)
             {
