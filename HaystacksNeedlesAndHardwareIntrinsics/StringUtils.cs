@@ -33,6 +33,8 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 
                     var and = Avx2.And(matchFirst, matchLast);
                     var maskBytes = Avx2.MoveMask(and.AsByte());
+                    if (maskBytes == 0) continue;
+                    
                     var mask = RemoveOddBits(maskBytes);
                     while (mask > 0)
                     {
