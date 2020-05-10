@@ -10,4 +10,10 @@
       <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Assets\text.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
