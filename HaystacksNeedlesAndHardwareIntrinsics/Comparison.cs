@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
@@ -22,6 +20,12 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
         }
         
         [Benchmark]
+        public int Naive()
+        {
+            return StringUtils.NaiveIndexOf(_haystack, _needle);
+        }
+        
+        [Benchmark]
         public int IndexOf()
         {
             return _haystack.IndexOf(_needle, StringComparison.Ordinal);
@@ -37,7 +41,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
         [Benchmark]
         public int Intrinsics()
         {
-            return StringUtils.IndexOf(_haystack, _needle);
+            return StringUtils.IntrinsicsIndexOf(_haystack, _needle);
         }
     }
 }

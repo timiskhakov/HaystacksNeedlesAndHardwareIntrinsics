@@ -6,9 +6,33 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 {
     public static class StringUtils
     {
-        public static unsafe int IndexOf(string haystack, string needle)
+        public static int NaiveIndexOf(string haystack, string needle)
         {
-            if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle))
+            if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle) || haystack.Length < needle.Length)
+            {
+                return -1;
+            }
+            
+            for (var i = 0; i <= haystack.Length - needle.Length; i++)
+            {
+                var j = 0;
+                for (; j < needle.Length; j++)
+                {
+                    if (haystack[i + j] != needle[j]) break;
+                } 
+  
+                if (j == needle.Length)
+                {
+                    return i;
+                } 
+            }
+
+            return -1;
+        }
+        
+        public static unsafe int IntrinsicsIndexOf(string haystack, string needle)
+        {
+            if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle) || haystack.Length < needle.Length)
             {
                 return -1;
             }
