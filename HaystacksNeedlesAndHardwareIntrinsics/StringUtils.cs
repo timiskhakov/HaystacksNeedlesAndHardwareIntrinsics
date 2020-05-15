@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
@@ -87,7 +88,7 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 
         private static int GetFirstBit(int n)
         {
-            return (int) (Math.Log10(n & -n) / Math.Log10(2));
+            return BitOperations.TrailingZeroCount(n);
         }
 
         private static int ClearFirstBit(int n)
