@@ -88,12 +88,12 @@ namespace HaystacksNeedlesAndHardwareIntrinsics
 
         private static int GetFirstBit(int n)
         {
-            return BitOperations.TrailingZeroCount(n);
+            return (int) Bmi1.TrailingZeroCount((uint) n);
         }
 
         private static int ClearFirstBit(int n)
         {
-            return n & (n - 1);
+            return (int) Bmi1.ResetLowestSetBit((uint) n);
         }
 
         private static unsafe bool Compare(ushort* source, int sourceOffset, ushort* dest, int destOffset, int length)
